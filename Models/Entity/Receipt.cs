@@ -21,7 +21,10 @@ public class Receipt
     public DateOnly BillDate { get; set; }
 
     [Column("Bill_Value")]
-    public float BillValue { get; set; }
+    public double BillValue { get; set; }
+
+    // Navigation property
+    public virtual Supplier Suppliers { get; set; } = null!;
 
     // Navigation property
     public virtual ICollection<ReceiptDetail> ReceiptDetails { get; set; } = null!;

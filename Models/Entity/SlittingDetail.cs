@@ -17,4 +17,7 @@ public class SlittingDetail
     public Single Weight { get; set; }
 
     public Single Moisture { get; set; }
+
+    // Navigation property
+    public virtual ProductionSlitting ProductionSlittings { get; set; } = null!;
 }

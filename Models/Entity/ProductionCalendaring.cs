@@ -33,5 +33,8 @@ public class ProductionCalendaring
     public byte RollCount { get; set; }
 
     // Navigation property
+    public virtual ProductionCoating ProductionCoatings { get; set; } = null!;
+
+    // Navigation property
     public virtual ICollection<ProductionSlitting> ProductionSlittings { get; set; } = null!;
 }

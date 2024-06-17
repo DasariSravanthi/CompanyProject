@@ -11,18 +11,24 @@ public class ProductStock
     [Column("PD_Id")]
     public byte ProductDetailId { get; set; }   // Foreign Key
 
-    public byte GSM { get; set; }
+    public byte? GSM { get; set; }
 
     [Column("Size_Id")]
-    public byte SizeId { get; set; }   // Foreign Key
+    public byte? SizeId { get; set; }   // Foreign Key
 
     [Column("Weight")]
     public Int16 WeightInKgs { get; set; }
 
     [Column("Roll_Count")]
-    public byte RollCount { get; set; }
+    public byte? RollCount { get; set; }
 
-     // Navigation property
+    // Navigation property
+    public virtual ProductDetail ProductDetails { get; set; } = null!;
+
+    // Navigation property
+    public virtual Size Sizes { get; set; } = null!;
+
+    // Navigation property
     public virtual ICollection<ReceiptDetail> ReceiptDetails { get; set; } = null!;
 
     // Navigation property

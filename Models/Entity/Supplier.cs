@@ -11,7 +11,7 @@ public class Supplier
     [Column("Supplier_Name", TypeName = "varchar(100)")]
     public String SupplierName { get; set; } = null!;
 
-    public float Dues;
+    public double Dues { get; set; }
 
     // Navigation property
     public virtual ICollection<Receipt> Receipts { get; set; } = null!;

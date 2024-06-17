@@ -11,8 +11,11 @@ public class RollNumber
     [Column("RD_Id")]
     public int ReceiptDetailId { get; set; }    // Foreign Key
 
-    [Column("Roll_Number")]
+    [Column("Roll_Number", TypeName = "varchar(100)")]
     public String RollNumberValue { get; set; } = null!;
+
+    // Navigation property
+    public virtual ReceiptDetail ReceiptDetails { get; set; } = null!;
 
     // Navigation property
     public virtual ICollection<Issue> Issues { get; set; } = null!;

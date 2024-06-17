@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 using CompanyApp.Data;
 using CompanyApp.Mapper;
+using CompanyApp.Converter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,9 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+    options.SerializerSettings.Converters.Add(new DateOnlyJsonConverter());
+    options.SerializerSettings.Converters.Add(new TimeOnlyJsonConverter());
+
 });
 
 builder.Services.AddDbContext<CompanyDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));

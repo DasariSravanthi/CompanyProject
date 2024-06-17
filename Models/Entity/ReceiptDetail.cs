@@ -20,7 +20,13 @@ public class ReceiptDetail
     public Single UnitRate { get; set; }
 
     [Column("Roll_Count")]
-    public byte RollCount { get; set; }
+    public byte? RollCount { get; set; }
+
+    // Navigation property
+    public virtual Receipt Receipts { get; set; } = null!;
+
+    // Navigation property
+    public virtual ProductStock ProductStocks { get; set; } = null!;
 
     // Navigation property
     public virtual ICollection<RollNumber> RollNumbers { get; set; } = null!;
