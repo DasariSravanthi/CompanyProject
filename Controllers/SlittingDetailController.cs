@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -13,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class SlittingDetailController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public SlittingDetailController(CompanyDbContext dbContext,  IMapper mapper)
+    public SlittingDetailController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -45,7 +46,13 @@ public class SlittingDetailController : ControllerBase {
     [HttpPost("addSlittingDetail")]
     public ActionResult AddSlittingDetail(SlittingDetailDto payloadSlittingDetail) {
 
-        var newSlittingDetail = _mapper.Map<SlittingDetail>(payloadSlittingDetail);
+        var productionSlittingExists = _dbContext.Set<ProductionSlitting>().Any(_ => _.ProductionSlittingId == payloadSlittingDetail.ProductionSlittingId);
+        if (!productionSlittingExists)
+        {
+            return BadRequest("Invalid ProductionSlittingId");
+        }
+
+        var newSlittingDetail = _mapper.Map<SlittingDetailDto, SlittingDetail>(payloadSlittingDetail);
 
         _dbContext.SlittingDetails.Add(newSlittingDetail);
         _dbContext.SaveChanges();
@@ -54,12 +61,20 @@ public class SlittingDetailController : ControllerBase {
     }
 
     [HttpPut("updateSlittingDetail/{id}")]
-    public ActionResult UpdateSlittingDetail(int id, SlittingDetailDto payloadSlittingDetail) {
+    public ActionResult UpdateSlittingDetail(int id, UpdateSlittingDetailDto payloadSlittingDetail) {
 
         var existingSlittingDetail = _dbContext.SlittingDetails.Find(id);
         if (existingSlittingDetail == null)
         {
             return NotFound();
+        }
+
+        if (payloadSlittingDetail.ProductionSlittingId.HasValue) {
+            var productionSlittingExists = _dbContext.Set<ProductionSlitting>().Any(_ => _.ProductionSlittingId == payloadSlittingDetail.ProductionSlittingId);
+            if (!productionSlittingExists)
+            {
+                return BadRequest("Invalid ProductionSlittingId");
+            }
         }
 
         _mapper.Map(payloadSlittingDetail, existingSlittingDetail);

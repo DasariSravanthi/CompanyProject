@@ -8,7 +8,7 @@ public class DateOnlyJsonConverter : JsonConverter<DateOnly>
 
     public override void WriteJson(JsonWriter writer, DateOnly value, JsonSerializer serializer)
     {
-        writer.WriteValue(value.ToString(DateFormat));
+        writer.WriteValue(value.ToString(DateFormat)); 
     }
 
     public override DateOnly ReadJson(JsonReader reader, Type objectType, DateOnly existingValue, bool hasExistingValue, JsonSerializer serializer)

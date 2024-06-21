@@ -1,4 +1,4 @@
-namespace CompanyApp.Models.DTO;
+namespace CompanyApp.Models.DTO.Create;
 
 public class SlittingDetailDto
 {

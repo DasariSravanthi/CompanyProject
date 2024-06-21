@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -12,9 +13,9 @@ namespace CompanyApp.Controllers;
 public class ProductController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public ProductController(CompanyDbContext dbContext, IMapper mapper)
+    public ProductController(CompanyDbContext dbContext, AppMapper mapper)
     {
         _dbContext = dbContext;
         _mapper = mapper;
@@ -44,7 +45,7 @@ public class ProductController : ControllerBase {
     [HttpPost("addProduct")]
     public ActionResult AddProduct(ProductDto payloadProduct) {
 
-        var newProduct = _mapper.Map<Product>(payloadProduct);
+        var newProduct = _mapper.Map<ProductDto, Product>(payloadProduct);
 
         _dbContext.Products.Add(newProduct);
         _dbContext.SaveChanges();
@@ -53,7 +54,7 @@ public class ProductController : ControllerBase {
     }
 
     [HttpPut("updateProduct/{id}")]
-    public ActionResult UpdateProduct(byte id, ProductDto payloadProduct) {
+    public ActionResult UpdateProduct(byte id, UpdateProductDto payloadProduct) {
 
         var existingProduct = _dbContext.Products.Find(id);
         if (existingProduct == null)

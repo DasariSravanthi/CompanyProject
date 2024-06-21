@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -12,9 +13,9 @@ namespace CompanyApp.Controllers;
 public class SizeController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public SizeController(CompanyDbContext dbContext, IMapper mapper)
+    public SizeController(CompanyDbContext dbContext, AppMapper mapper)
     {
         _dbContext = dbContext;
         _mapper = mapper;
@@ -44,7 +45,7 @@ public class SizeController : ControllerBase {
     [HttpPost("addSize")]
     public ActionResult AddSize(SizeDto payloadSize) {
 
-        var newSize = _mapper.Map<Size>(payloadSize);
+        var newSize = _mapper.Map<SizeDto, Size>(payloadSize);
 
         _dbContext.Sizes.Add(newSize);
         _dbContext.SaveChanges();
@@ -53,7 +54,7 @@ public class SizeController : ControllerBase {
     }
 
     [HttpPut("updateSize/{id}")]
-    public ActionResult UpdateSize(byte id, SizeDto payloadSize) {
+    public ActionResult UpdateSize(byte id, UpdateSizeDto payloadSize) {
 
         var existingSize = _dbContext.Sizes.Find(id);
         if (existingSize == null)

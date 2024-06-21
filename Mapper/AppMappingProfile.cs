@@ -1,7 +1,8 @@
 using AutoMapper;
 
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
 
 namespace CompanyApp.Mapper;
 
@@ -47,5 +48,9 @@ public class AppMappingProfile : Profile
             .ForMember(dest => dest.SlittingEnd, opt => opt.MapFrom(src => TimeOnly.Parse(src.SlittingEnd)));
 
         CreateMap<SlittingDetailDto, SlittingDetail>();
+
+        CreateMap<UpdateSupplierDto, Supplier>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));    // Ignore null values;
+        
     }
 }

@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Mapster;
 
 using CompanyApp.Data;
-using CompanyApp.Mapper;
 using CompanyApp.Converter;
+using CompanyApp.Mapper.MapperService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,14 +13,24 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-    options.SerializerSettings.Converters.Add(new DateOnlyJsonConverter());
-    options.SerializerSettings.Converters.Add(new TimeOnlyJsonConverter());
+    options.SerializerSettings.Converters.Add(new NullableDateOnlyJsonConverter());
+    options.SerializerSettings.Converters.Add(new NullableTimeOnlyJsonConverter());
 
 });
 
 builder.Services.AddDbContext<CompanyDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection")));
 
-builder.Services.AddAutoMapper(typeof(AppMappingProfile));
+// Create the Mapster configuration
+var config = new TypeAdapterConfig();
+MapsterConfiguration.ConfigureMappings(config);
+
+// Register the TypeAdapterConfig as a singleton service
+builder.Services.AddSingleton(config);
+
+// Register the MapperService as a scoped service
+builder.Services.AddScoped<AppMapper>();
+
+//builder.Services.AddAutoMapper(typeof(AppMappingProfile));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

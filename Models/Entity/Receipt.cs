@@ -15,7 +15,7 @@ public class Receipt
     public byte SupplierId { get; set; }   // Foreign Key
 
     [Column("Bill_No", TypeName = "varchar(100)")]
-    public String BillNo { get; set; } = null!;
+    public string BillNo { get; set; } = null!;
 
     [Column("Bill_Date")]
     public DateOnly BillDate { get; set; }

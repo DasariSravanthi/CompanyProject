@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -13,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class ReceiptDetailController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public ReceiptDetailController(CompanyDbContext dbContext,  IMapper mapper)
+    public ReceiptDetailController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -45,7 +46,19 @@ public class ReceiptDetailController : ControllerBase {
     [HttpPost("addReceiptDetail")]
     public ActionResult AddReceiptDetail(ReceiptDetailDto payloadReceiptDetail) {
 
-        var newReceiptDetail = _mapper.Map<ReceiptDetail>(payloadReceiptDetail);
+        var receiptExists = _dbContext.Set<Receipt>().Any(_ => _.ReceiptId == payloadReceiptDetail.ReceiptId);
+        if (!receiptExists)
+        {
+            return BadRequest("Invalid ReceiptId");
+        }
+
+        var productStockExists = _dbContext.Set<ProductStock>().Any(_ => _.ProductStockId == payloadReceiptDetail.ProductStockId);
+        if (!productStockExists)
+        {
+            return BadRequest("Invalid ProductStockId");
+        }
+        
+        var newReceiptDetail = _mapper.Map<ReceiptDetailDto, ReceiptDetail>(payloadReceiptDetail);
 
         _dbContext.ReceiptDetails.Add(newReceiptDetail);
         _dbContext.SaveChanges();
@@ -54,12 +67,28 @@ public class ReceiptDetailController : ControllerBase {
     }
 
     [HttpPut("updateReceiptDetail/{id}")]
-    public ActionResult UpdateReceiptDetail(int id, ReceiptDetailDto payloadReceiptDetail) {
+    public ActionResult UpdateReceiptDetail(int id, UpdateReceiptDetailDto payloadReceiptDetail) {
 
         var existingReceiptDetail = _dbContext.ReceiptDetails.Find(id);
         if (existingReceiptDetail == null)
         {
             return NotFound();
+        }
+
+        if (payloadReceiptDetail.ReceiptId.HasValue) {
+            var receiptExists = _dbContext.Set<Receipt>().Any(_ => _.ReceiptId == payloadReceiptDetail.ReceiptId);
+            if (!receiptExists)
+            {
+                return BadRequest("Invalid ReceiptId");
+            }
+        }
+
+        if (payloadReceiptDetail.ProductStockId.HasValue) {
+            var productStockExists = _dbContext.Set<ProductStock>().Any(_ => _.ProductStockId == payloadReceiptDetail.ProductStockId);
+            if (!productStockExists)
+            {
+                return BadRequest("Invalid ProductStockId");
+            }
         }
 
         _mapper.Map(payloadReceiptDetail, existingReceiptDetail);

@@ -12,7 +12,7 @@ public class RollNumber
     public int ReceiptDetailId { get; set; }    // Foreign Key
 
     [Column("Roll_Number", TypeName = "varchar(100)")]
-    public String RollNumberValue { get; set; } = null!;
+    public string RollNumberValue { get; set; } = null!;
 
     // Navigation property
     public virtual ReceiptDetail ReceiptDetails { get; set; } = null!;

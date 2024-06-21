@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -13,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class ProductionCoatingController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public ProductionCoatingController(CompanyDbContext dbContext,  IMapper mapper)
+    public ProductionCoatingController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -45,7 +46,13 @@ public class ProductionCoatingController : ControllerBase {
     [HttpPost("addProductionCoating")]
     public ActionResult AddProductionCoating(ProductionCoatingDto payloadProductionCoating) {
 
-        var newProductionCoating = _mapper.Map<ProductionCoating>(payloadProductionCoating);
+        var issueExists = _dbContext.Set<Issue>().Any(_ => _.IssueId == payloadProductionCoating.IssueId);
+        if (!issueExists)
+        {
+            return BadRequest("Invalid IssueId");
+        }
+
+        var newProductionCoating = _mapper.Map<ProductionCoatingDto, ProductionCoating>(payloadProductionCoating);
 
         _dbContext.ProductionCoatings.Add(newProductionCoating);
         _dbContext.SaveChanges();
@@ -54,12 +61,20 @@ public class ProductionCoatingController : ControllerBase {
     }
 
     [HttpPut("updateProductionCoating/{id}")]
-    public ActionResult UpdateProductionCoating(int id, ProductionCoatingDto payloadProductionCoating) {
+    public ActionResult UpdateProductionCoating(int id, UpdateProductionCoatingDto payloadProductionCoating) {
 
         var existingProductionCoating = _dbContext.ProductionCoatings.Find(id);
         if (existingProductionCoating == null)
         {
             return NotFound();
+        }
+
+        if (payloadProductionCoating.IssueId.HasValue) {
+            var issueExists = _dbContext.Set<Issue>().Any(_ => _.IssueId == payloadProductionCoating.IssueId);
+            if (!issueExists)
+            {
+                return BadRequest("Invalid IssueId");
+            }
         }
 
         _mapper.Map(payloadProductionCoating, existingProductionCoating);

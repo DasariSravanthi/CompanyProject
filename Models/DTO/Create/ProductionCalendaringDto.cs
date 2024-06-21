@@ -1,8 +1,8 @@
-namespace CompanyApp.Models.DTO;
+namespace CompanyApp.Models.DTO.Create;
 
 public class ProductionCalendaringDto
 {
-    public String ProductionCoatingDate { get; set; } = null!;
+    public string ProductionCoatingDate { get; set; } = null!;
 
     public int ProductionCoatingId { get; set; }    // Foreign Key
 
@@ -12,9 +12,9 @@ public class ProductionCalendaringDto
 
     public Single BeforeMoisture { get; set; }
 
-    public String CalendaringStart { get; set; } = null!;
+    public string CalendaringStart { get; set; } = null!;
 
-    public String CalendaringEnd { get; set; } = null!;
+    public string CalendaringEnd { get; set; } = null!;
 
     public byte RollCount { get; set; }
 }

@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -13,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class ProductDetailController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public ProductDetailController(CompanyDbContext dbContext,  IMapper mapper)
+    public ProductDetailController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -45,7 +46,15 @@ public class ProductDetailController : ControllerBase {
     [HttpPost("addProductDetail")]
     public ActionResult AddProductDetail(ProductDetailDto payloadProductDetail) {
 
-        var newProductDetail = _mapper.Map<ProductDetail>(payloadProductDetail);
+        //Validate foreign key
+
+        var productExists = _dbContext.Set<Product>().Any(_ => _.ProductId == payloadProductDetail.ProductId);
+        if (!productExists)
+        {
+            return BadRequest("Invalid ProductId");
+        }
+
+        var newProductDetail = _mapper.Map<ProductDetailDto, ProductDetail>(payloadProductDetail);
 
         _dbContext.ProductDetails.Add(newProductDetail);
         _dbContext.SaveChanges();
@@ -54,12 +63,20 @@ public class ProductDetailController : ControllerBase {
     }
 
     [HttpPut("updateProductDetail/{id}")]
-    public ActionResult UpdateProductDetail(byte id, ProductDetailDto payloadProductDetail) {
+    public ActionResult UpdateProductDetail(byte id, UpdateProductDetailDto payloadProductDetail) {
 
         var existingProductDetail = _dbContext.ProductDetails.Find(id);
         if (existingProductDetail == null)
         {
             return NotFound();
+        }
+
+        if (payloadProductDetail.ProductId.HasValue) {
+            var productExists = _dbContext.Set<Product>().Any(_ => _.ProductId == payloadProductDetail.ProductId);
+            if (!productExists)
+            {
+                return BadRequest("Invalid ProductId");
+            }
         }
 
         _mapper.Map(payloadProductDetail, existingProductDetail);

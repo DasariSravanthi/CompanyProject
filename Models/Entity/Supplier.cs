@@ -9,7 +9,7 @@ public class Supplier
     public byte SupplierId { get; set; }
 
     [Column("Supplier_Name", TypeName = "varchar(100)")]
-    public String SupplierName { get; set; } = null!;
+    public string SupplierName { get; set; } = null!;
 
     public double Dues { get; set; }
 

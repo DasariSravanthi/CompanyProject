@@ -141,3 +141,5 @@ C:\Users\rohit\.net project\CompanyApp\bin\Debug\net8.0\Newtonsoft.Json.Bson.dll
 C:\Users\rohit\.net project\CompanyApp\bin\Debug\net8.0\AutoMapper.dll
 C:\Users\rohit\.net project\CompanyApp\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 C:\Users\rohit\.net project\CompanyApp\obj\Debug\net8.0\CompanyApp.sourcelink.json
+C:\Users\rohit\.net project\CompanyApp\bin\Debug\net8.0\Mapster.dll
+C:\Users\rohit\.net project\CompanyApp\bin\Debug\net8.0\Mapster.Core.dll

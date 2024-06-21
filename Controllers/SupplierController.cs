@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -12,9 +13,10 @@ namespace CompanyApp.Controllers;
 public class SupplierController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
 
-    public SupplierController(CompanyDbContext dbContext, IMapper mapper)
+    private readonly AppMapper _mapper;
+
+    public SupplierController(CompanyDbContext dbContext, AppMapper mapper)
     {
         _dbContext = dbContext;
         _mapper = mapper;
@@ -44,7 +46,7 @@ public class SupplierController : ControllerBase {
     [HttpPost("addSupplier")]
     public ActionResult AddSupplier(SupplierDto payloadSupplier) {
 
-        var newSupplier = _mapper.Map<Supplier>(payloadSupplier);
+        var newSupplier = _mapper.Map<SupplierDto, Supplier>(payloadSupplier);
 
         _dbContext.Suppliers.Add(newSupplier);
         _dbContext.SaveChanges();
@@ -53,14 +55,14 @@ public class SupplierController : ControllerBase {
     }
 
     [HttpPut("updateSupplier/{id}")]
-    public ActionResult UpdateSupplier(byte id, SupplierDto payloadSupplier) {
+    public ActionResult UpdateSupplier(byte id, UpdateSupplierDto payloadSupplier) {
 
         var existingSupplier = _dbContext.Suppliers.Find(id);
         if (existingSupplier == null)
         {
             return NotFound();
         }
-
+        
         _mapper.Map(payloadSupplier, existingSupplier);
 
         _dbContext.Suppliers.Update(existingSupplier);

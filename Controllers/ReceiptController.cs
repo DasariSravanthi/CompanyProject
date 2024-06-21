@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Options;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -15,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class ReceiptController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public ReceiptController(CompanyDbContext dbContext,  IMapper mapper)
+    public ReceiptController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -47,7 +46,13 @@ public class ReceiptController : ControllerBase {
     [HttpPost("addReceipt")]
     public ActionResult AddReceipt(ReceiptDto payloadReceipt) {
 
-        var newReceipt = _mapper.Map<Receipt>(payloadReceipt);
+        var supplierExists = _dbContext.Set<Supplier>().Any(_ => _.SupplierId == payloadReceipt.SupplierId);
+        if (!supplierExists)
+        {
+            return BadRequest("Invalid SupplierId");
+        }
+
+        var newReceipt = _mapper.Map<ReceiptDto, Receipt>(payloadReceipt);
 
         _dbContext.Receipts.Add(newReceipt);
         _dbContext.SaveChanges();
@@ -56,12 +61,20 @@ public class ReceiptController : ControllerBase {
     }
 
     [HttpPut("updateReceipt/{id}")]
-    public ActionResult UpdateReceipt(int id, ReceiptDto payloadReceipt) {
+    public ActionResult UpdateReceipt(int id, UpdateReceiptDto payloadReceipt) {
 
         var existingReceipt = _dbContext.Receipts.Find(id);
         if (existingReceipt == null)
         {
             return NotFound();
+        }
+
+        if (payloadReceipt.SupplierId.HasValue) {
+            var supplierExists = _dbContext.Set<Supplier>().Any(_ => _.SupplierId == payloadReceipt.SupplierId);
+            if (!supplierExists)
+            {
+                return BadRequest("Invalid SupplierId");
+            }
         }
 
         _mapper.Map(payloadReceipt, existingReceipt);

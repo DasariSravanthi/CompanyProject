@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -13,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class RollNumberController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public RollNumberController(CompanyDbContext dbContext,  IMapper mapper)
+    public RollNumberController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -45,7 +46,13 @@ public class RollNumberController : ControllerBase {
     [HttpPost("addRollNumber")]
     public ActionResult AddRollNumber(RollNumberDto payloadRollNumber) {
 
-        var newRollNumber = _mapper.Map<RollNumber>(payloadRollNumber);
+        var receiptDetailExists = _dbContext.Set<ReceiptDetail>().Any(_ => _.ReceiptDetailId == payloadRollNumber.ReceiptDetailId);
+        if (!receiptDetailExists)
+        {
+            return BadRequest("Invalid ReceiptDetailId");
+        }
+
+        var newRollNumber = _mapper.Map<RollNumberDto, RollNumber>(payloadRollNumber);
 
         _dbContext.RollNumbers.Add(newRollNumber);
         _dbContext.SaveChanges();
@@ -54,12 +61,20 @@ public class RollNumberController : ControllerBase {
     }
 
     [HttpPut("updateRollNumber/{id}")]
-    public ActionResult UpdateRollNumber(int id, RollNumberDto payloadRollNumber) {
+    public ActionResult UpdateRollNumber(int id, UpdateRollNumberDto payloadRollNumber) {
 
         var existingRollNumber = _dbContext.RollNumbers.Find(id);
         if (existingRollNumber == null)
         {
             return NotFound();
+        }
+
+        if (payloadRollNumber.ReceiptDetailId.HasValue) {
+            var receiptDetailExists = _dbContext.Set<ReceiptDetail>().Any(_ => _.ReceiptDetailId == payloadRollNumber.ReceiptDetailId);
+            if (!receiptDetailExists)
+            {
+                return BadRequest("Invalid ReceiptDetailId");
+            }
         }
 
         _mapper.Map(payloadRollNumber, existingRollNumber);

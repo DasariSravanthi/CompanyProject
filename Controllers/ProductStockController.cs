@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -13,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class ProductStockController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public ProductStockController(CompanyDbContext dbContext,  IMapper mapper)
+    public ProductStockController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -45,7 +46,19 @@ public class ProductStockController : ControllerBase {
     [HttpPost("addProductStock")]
     public ActionResult AddProductStock(ProductStockDto payloadProductStock) {
 
-        var newProductStock = _mapper.Map<ProductStock>(payloadProductStock);
+        var productDetailExists = _dbContext.Set<ProductDetail>().Any(_ => _.ProductDetailId == payloadProductStock.ProductDetailId);
+        if (!productDetailExists)
+        {
+            return BadRequest("Invalid ProductDetailId");
+        }
+
+        var sizeExists = _dbContext.Set<Size>().Any(_ => _.SizeId == payloadProductStock.SizeId);
+        if (!sizeExists)
+        {
+            return BadRequest("Invalid SizeId");
+        }
+
+        var newProductStock = _mapper.Map<ProductStockDto, ProductStock>(payloadProductStock);
 
         _dbContext.ProductStocks.Add(newProductStock);
         _dbContext.SaveChanges();
@@ -54,12 +67,28 @@ public class ProductStockController : ControllerBase {
     }
 
     [HttpPut("updateProductStock/{id}")]
-    public ActionResult UpdateProductStock(Int16 id, ProductStockDto payloadProductStock) {
+    public ActionResult UpdateProductStock(Int16 id, UpdateProductStockDto payloadProductStock) {
 
         var existingProductStock = _dbContext.ProductStocks.Find(id);
         if (existingProductStock == null)
         {
             return NotFound();
+        }
+
+        if (payloadProductStock.ProductDetailId.HasValue) {
+            var productDetailExists = _dbContext.Set<ProductDetail>().Any(_ => _.ProductDetailId == payloadProductStock.ProductDetailId);
+            if (!productDetailExists)
+            {
+                return BadRequest("Invalid ProductDetailId");
+            }
+        }
+
+        if (payloadProductStock.SizeId.HasValue) {
+            var sizeExists = _dbContext.Set<Size>().Any(_ => _.SizeId == payloadProductStock.SizeId);
+            if (!sizeExists)
+            {
+                return BadRequest("Invalid SizeId");
+            }
         }
 
         _mapper.Map(payloadProductStock, existingProductStock);

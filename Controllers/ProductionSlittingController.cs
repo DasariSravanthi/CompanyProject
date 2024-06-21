@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 using CompanyApp.Data;
 using CompanyApp.Models.Entity;
-using CompanyApp.Models.DTO;
+using CompanyApp.Models.DTO.Create;
+using CompanyApp.Models.DTO.Update;
+using CompanyApp.Mapper.MapperService;
 
 namespace CompanyApp.Controllers;
 
@@ -13,9 +14,9 @@ namespace CompanyApp.Controllers;
 public class ProductionSlittingController : ControllerBase {
     
     private readonly CompanyDbContext _dbContext;
-    private readonly IMapper _mapper;
+    private readonly AppMapper _mapper;
 
-    public ProductionSlittingController(CompanyDbContext dbContext,  IMapper mapper)
+    public ProductionSlittingController(CompanyDbContext dbContext,  AppMapper mapper)
     {
         _dbContext = dbContext;
          _mapper = mapper;
@@ -45,7 +46,13 @@ public class ProductionSlittingController : ControllerBase {
     [HttpPost("addProductionSlitting")]
     public ActionResult AddProductionSlitting(ProductionSlittingDto payloadProductionSlitting) {
 
-        var newProductionSlitting = _mapper.Map<ProductionSlitting>(payloadProductionSlitting);
+        var productionCalendaringExists = _dbContext.Set<ProductionCalendaring>().Any(_ => _.ProductionCalendaringId == payloadProductionSlitting.ProductionCalendaringId);
+        if (!productionCalendaringExists)
+        {
+            return BadRequest("Invalid ProductionCalendaringId");
+        }
+
+        var newProductionSlitting = _mapper.Map<ProductionSlittingDto, ProductionSlitting>(payloadProductionSlitting);
 
         _dbContext.ProductionSlittings.Add(newProductionSlitting);
         _dbContext.SaveChanges();
@@ -54,12 +61,20 @@ public class ProductionSlittingController : ControllerBase {
     }
 
     [HttpPut("updateProductionSlitting/{id}")]
-    public ActionResult UpdateProductionSlitting(int id, ProductionSlittingDto payloadProductionSlitting) {
+    public ActionResult UpdateProductionSlitting(int id, UpdateProductionSlittingDto payloadProductionSlitting) {
 
         var existingProductionSlitting = _dbContext.ProductionSlittings.Find(id);
         if (existingProductionSlitting == null)
         {
             return NotFound();
+        }
+
+        if (payloadProductionSlitting.ProductionCalendaringId.HasValue) {
+            var productionCalendaringExists = _dbContext.Set<ProductionCalendaring>().Any(_ => _.ProductionCalendaringId == payloadProductionSlitting.ProductionCalendaringId);
+            if (!productionCalendaringExists)
+            {
+                return BadRequest("Invalid ProductionCalendaringId");
+            }
         }
 
         _mapper.Map(payloadProductionSlitting, existingProductionSlitting);
