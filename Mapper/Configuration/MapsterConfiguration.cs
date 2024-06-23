@@ -102,7 +102,7 @@ public static class MapsterConfiguration
         
     }
 
-    private static DateOnly? DeserializeDateOnly(string json)
+    private static DateOnly? DeserializeDateOnly(string? json)
     {
         if (string.IsNullOrEmpty(json))
             return null;
@@ -120,7 +120,7 @@ public static class MapsterConfiguration
         return JsonConvert.SerializeObject(date, new NullableDateOnlyJsonConverter());
     }
 
-    private static TimeOnly? DeserializeTimeOnly(string json)
+    private static TimeOnly? DeserializeTimeOnly(string? json)
     {
         if (string.IsNullOrEmpty(json))
             return null;
