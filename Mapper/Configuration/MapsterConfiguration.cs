@@ -6,6 +6,8 @@ using CompanyApp.Models.DTO.Create;
 using CompanyApp.Models.DTO.Update;
 using CompanyApp.Converter;
 
+namespace CompanyApp.Mapper.Configuration;
+
 public static class MapsterConfiguration
 {
     public static void ConfigureMappings(TypeAdapterConfig config)
@@ -92,7 +94,7 @@ public static class MapsterConfiguration
               .IgnoreNullValues(true);
 
         config.NewConfig<UpdateProductionSlittingDto, ProductionSlitting>()
-              .Map(dest => dest.ProductionCoatingDate, src => (src != null) ? DeserializeDateOnly(src.ProductionCoatingDate) : null)
+              .Map(dest => dest.ProductionCoatingDate, src => DeserializeDateOnly(src.ProductionCoatingDate))
               .Map(dest => dest.SlittingStart, src => DeserializeTimeOnly(src.SlittingStart))
               .Map(dest => dest.SlittingEnd, src => DeserializeTimeOnly(src.SlittingEnd))
               .IgnoreNullValues(true);
@@ -102,13 +104,17 @@ public static class MapsterConfiguration
         
     }
 
-    private static DateOnly? DeserializeDateOnly(string json)
+    private static DateOnly? DeserializeDateOnly(string? dateString)
     {
-        if (string.IsNullOrEmpty(json))
+        if (string.IsNullOrEmpty(dateString))
             return null;
+            
+        if (DateOnly.TryParseExact(dateString, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var date)) 
+        {
+            return date;
+        }
 
-        // Use Newtonsoft.Json to deserialize the date string
-        return JsonConvert.DeserializeObject<DateOnly?>(json, new NullableDateOnlyJsonConverter());
+        throw new JsonException($"Unable to convert \"{dateString}\" to DateOnly.");
     }
 
     private static string? SerializeDateOnly(DateOnly? date)
@@ -119,14 +125,18 @@ public static class MapsterConfiguration
         // Use Newtonsoft.Json to serialize the DateOnly value
         return JsonConvert.SerializeObject(date, new NullableDateOnlyJsonConverter());
     }
-
-    private static TimeOnly? DeserializeTimeOnly(string json)
+    
+    private static TimeOnly? DeserializeTimeOnly(string? timeString)
     {
-        if (string.IsNullOrEmpty(json))
+        if (string.IsNullOrEmpty(timeString))
             return null;
 
-        // Use Newtonsoft.Json to deserialize the time string
-        return JsonConvert.DeserializeObject<TimeOnly?>(json, new NullableTimeOnlyJsonConverter());
+        if (TimeOnly.TryParseExact(timeString, "HH:mm", null, System.Globalization.DateTimeStyles.None, out var time))
+        {
+            return time;
+        }
+
+        throw new JsonException($"Unable to convert \"{timeString}\" to TimeOnly.");
     }
 
     private static string? SerializeTimeOnly(TimeOnly? time)
